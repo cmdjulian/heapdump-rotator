@@ -5,7 +5,7 @@ import java.nio.file.Path
 import java.time.Clock
 import kotlin.io.path.*
 
-class HeapDumpRotator(
+class HeapDumpRotator @JvmOverloads constructor(
     private val maxRetainedDumps: Int? = null,
     private val jvmArgs: List<String> = ManagementFactory.getRuntimeMXBean().inputArguments,
     private val clock: Clock = Clock.systemUTC()
