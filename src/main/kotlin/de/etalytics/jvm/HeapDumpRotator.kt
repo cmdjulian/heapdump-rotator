@@ -11,12 +11,12 @@ import java.time.Clock
  * Rotates JVM heap dump files (`.hprof`) on application startup to prevent file collisions
  * when a Kubernetes pod restarts after an OutOfMemoryError.
  *
- * @param maxRetainedDumps optional maximum number of rotated dump files to retain (FIFO policy)
+ * @param maxRetainedDumps maximum number of rotated dump files to retain (FIFO policy); 0 means unlimited
  * @param jvmArgs the JVM arguments to scan for `-XX:HeapDumpPath=`; defaults to the current process arguments
  * @param clock clock used to generate the rotation timestamp; defaults to UTC system clock
  */
 class HeapDumpRotator @JvmOverloads constructor(
-    private val maxRetainedDumps: Int? = null,
+    private val maxRetainedDumps: Int = 0,
     private val jvmArgs: List<String> = ManagementFactory.getRuntimeMXBean().inputArguments,
     private val clock: Clock = Clock.systemUTC()
 ) {
@@ -64,7 +64,7 @@ class HeapDumpRotator @JvmOverloads constructor(
         }
 
         // Enforce retention policy if configured
-        if (maxRetainedDumps != null && maxRetainedDumps > 0) {
+        if (maxRetainedDumps > 0) {
             enforceRetentionPolicy(dir, maxRetainedDumps)
         }
     }

@@ -80,7 +80,7 @@ public class Application {
 
 | Parameter          | Type           | Default                        | Description                                                                               |
 |--------------------|----------------|--------------------------------|-------------------------------------------------------------------------------------------|
-| `maxRetainedDumps` | `Int?`         | `null` (unlimited)             | Maximum number of rotated `.hprof` files to keep. Oldest files are deleted when exceeded. |
+| `maxRetainedDumps` | `Int`          | `0` (unlimited)                | Maximum number of rotated `.hprof` files to keep. Oldest files are deleted when exceeded. `0` means no limit. |
 | `jvmArgs`          | `List<String>` | `RuntimeMXBean.inputArguments` | JVM arguments to scan for `-XX:HeapDumpPath=`. Override for testing.                     |
 | `clock`            | `Clock`        | `Clock.systemUTC()`            | Clock used to generate the rotation timestamp. Override for testing.                      |
 
