@@ -81,5 +81,27 @@ fun main(args: Array<String>) {
 3. Renames matched files to `<name>-<epochSeconds><ext>`.
 4. If `maxRetainedDumps` is set, removes the oldest archived dumps exceeding the limit.
 
-All errors are caught and printed to `stderr` so the library never prevents your application from starting.
+All errors are caught and logged as warnings so the library never prevents your application from starting.
+
+## Logging
+
+`heapdump-rotator` uses `java.util.logging` (JUL), which is part of the JDK and requires no additional dependencies.
+
+| Event | Level |
+|---|---|
+| Heap dump archived (renamed) | `INFO` |
+| Old dump deleted (retention policy) | `INFO` |
+| Directory missing / no `-XX:HeapDumpPath` arg | `FINE` |
+| Exception during rotation | `WARNING` |
+
+The logger name is `de.etalytics.jvm.HeapDumpRotator`.
+
+### Behaviour when called before Spring Boot initializes
+
+The recommended usage is to call `rotate()` **before** `runApplication<MyApplication>(*args)`, which means it runs before Spring installs the `jul-to-slf4j` bridge. At that point:
+
+- JUL logs `INFO` and above directly to its own `ConsoleHandler` (always visible on the console).
+- Spring's `logging.level` configuration in `application.yaml` or `logback.xml` does **not** apply to this early call, since the bridge is not yet active.
+
+This is intentional — rotation must happen before the JVM could potentially overwrite an existing dump. The `INFO` messages confirm that rotation occurred and are always visible regardless of Spring's log configuration.
 
