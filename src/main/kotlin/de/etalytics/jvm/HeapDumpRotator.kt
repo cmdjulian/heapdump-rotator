@@ -3,6 +3,7 @@ package de.etalytics.jvm
 import java.lang.management.ManagementFactory
 import java.nio.file.Path
 import java.time.Clock
+import java.util.logging.Logger
 import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.exists
@@ -21,13 +22,22 @@ class HeapDumpRotator
         private val jvmArgs: List<String> = ManagementFactory.getRuntimeMXBean().inputArguments,
         private val clock: Clock = Clock.systemUTC(),
     ) {
+        private val logger = Logger.getLogger(HeapDumpRotator::class.java.name)
+
         fun rotate() {
             try {
-                val dumpArg = jvmArgs.find { it.startsWith("-XX:HeapDumpPath=") } ?: return
+                val dumpArg =
+                    jvmArgs.find { it.startsWith("-XX:HeapDumpPath=") } ?: run {
+                        logger.fine("No -XX:HeapDumpPath JVM argument found, skipping heap dump rotation")
+                        return
+                    }
                 val dumpPath = Path(dumpArg.substringAfter("="))
                 val parentDir = dumpPath.parent ?: Path(".")
 
-                if (!parentDir.exists() || !parentDir.isDirectory()) return
+                if (!parentDir.exists() || !parentDir.isDirectory()) {
+                    logger.fine("Heap dump directory does not exist: $parentDir, skipping rotation")
+                    return
+                }
 
                 val ext = if (dumpPath.extension.isNotEmpty()) ".${dumpPath.extension}" else ""
                 val parts = dumpPath.name.split("%p")
@@ -44,7 +54,7 @@ class HeapDumpRotator
                         val timestamp = clock.instant().epochSecond
                         val archivedFile = file.resolveSibling("${file.nameWithoutExtension}-$timestamp$ext")
                         file.moveTo(archivedFile, overwrite = true)
-                        println("Archived previous JVM heap dump: ${file.name} -> ${archivedFile.name}")
+                        logger.info("Archived previous JVM heap dump: ${file.name} -> ${archivedFile.name}")
                     }
                 }
 
@@ -55,16 +65,18 @@ class HeapDumpRotator
                             .filter { rotatedRegex.matches(it.name) }
                             .sortedBy { it.getLastModifiedTime() }
 
+                    logger.fine("Found ${archivedDumps.size} rotated heap dumps, retention limit is $maxRetainedDumps")
+
                     val dumpsToDelete = archivedDumps.size - maxRetainedDumps
                     if (dumpsToDelete > 0) {
                         archivedDumps.take(dumpsToDelete).forEach { file ->
                             file.deleteIfExists()
-                            println("Deleted old heap dump to enforce retention policy: ${file.name}")
+                            logger.info("Deleted old heap dump to enforce retention policy: ${file.name}")
                         }
                     }
                 }
             } catch (e: Exception) {
-                System.err.println("Notice: Could not process heap dumps: ${e.message}")
+                logger.warning("Could not process heap dumps: ${e.message}")
             }
         }
     }
