@@ -1,13 +1,18 @@
 plugins {
     kotlin("jvm") version "2.2.0"
     `maven-publish`
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 }
 
 group = "com.github.cmdjulian"
-version = "1.0.0"
+version = project.findProperty("projectVersion")?.toString() ?: "1.0.0"
 
 kotlin {
     jvmToolchain(11)
+}
+
+java {
+    withSourcesJar()
 }
 
 repositories {
@@ -28,6 +33,16 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/cmdjulian/heapdump-rotator")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
         }
     }
 }

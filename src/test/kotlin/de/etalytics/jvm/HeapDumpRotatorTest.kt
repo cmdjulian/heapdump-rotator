@@ -1,22 +1,28 @@
 package de.etalytics.jvm
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
-import kotlin.io.path.*
+import kotlin.io.path.createFile
+import kotlin.io.path.exists
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 
 class HeapDumpRotatorTest {
-
     private val fixedClock = Clock.fixed(Instant.ofEpochSecond(1700000000L), ZoneOffset.UTC)
 
     @Test
-    fun `rotates existing heap dump file`(@TempDir tempDir: Path) {
+    fun `rotates existing heap dump file`(
+        @TempDir tempDir: Path,
+    ) {
         val dumpFile = tempDir.resolve("heap.hprof").also { it.createFile() }
-        val args = listOf("-XX:HeapDumpPath=${dumpFile}")
+        val args = listOf("-XX:HeapDumpPath=$dumpFile")
 
         HeapDumpRotator(jvmArgs = args, clock = fixedClock).rotate()
 
@@ -26,7 +32,9 @@ class HeapDumpRotatorTest {
     }
 
     @Test
-    fun `rotates heap dump file with %p placeholder`(@TempDir tempDir: Path) {
+    fun `rotates heap dump file with %p placeholder`(
+        @TempDir tempDir: Path,
+    ) {
         val pid = 12345L
         val dumpFile = tempDir.resolve("heap-$pid.hprof").also { it.createFile() }
         val args = listOf("-XX:HeapDumpPath=${tempDir.resolve("heap-%p.hprof")}")
@@ -39,7 +47,9 @@ class HeapDumpRotatorTest {
     }
 
     @Test
-    fun `does nothing when no matching dump file exists`(@TempDir tempDir: Path) {
+    fun `does nothing when no matching dump file exists`(
+        @TempDir tempDir: Path,
+    ) {
         val args = listOf("-XX:HeapDumpPath=${tempDir.resolve("heap.hprof")}")
 
         HeapDumpRotator(jvmArgs = args, clock = fixedClock).rotate()
@@ -48,13 +58,17 @@ class HeapDumpRotatorTest {
     }
 
     @Test
-    fun `does nothing when no HeapDumpPath JVM arg is present`(@TempDir tempDir: Path) {
+    fun `does nothing when no HeapDumpPath JVM arg is present`(
+        @TempDir tempDir: Path,
+    ) {
         HeapDumpRotator(jvmArgs = emptyList(), clock = fixedClock).rotate()
         assertTrue(tempDir.listDirectoryEntries().isEmpty())
     }
 
     @Test
-    fun `enforces retention policy by deleting oldest dumps`(@TempDir tempDir: Path) {
+    fun `enforces retention policy by deleting oldest dumps`(
+        @TempDir tempDir: Path,
+    ) {
         val dumpPath = tempDir.resolve("heap.hprof")
         val args = listOf("-XX:HeapDumpPath=$dumpPath")
 
@@ -80,7 +94,9 @@ class HeapDumpRotatorTest {
     }
 
     @Test
-    fun `does not delete dumps when count is within retention limit`(@TempDir tempDir: Path) {
+    fun `does not delete dumps when count is within retention limit`(
+        @TempDir tempDir: Path,
+    ) {
         val dumpPath = tempDir.resolve("heap.hprof")
         val args = listOf("-XX:HeapDumpPath=$dumpPath")
 
