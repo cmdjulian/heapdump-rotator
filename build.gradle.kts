@@ -33,6 +33,21 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
+            pom {
+                name = "heapdump-rotator"
+                description = "A zero-dependency JVM utility to automatically rotate and retain OOM heap dumps on startup."
+                url = "https://github.com/cmdjulian/heapdump-rotator"
+                licenses {
+                    license {
+                        name = "MIT License"
+                        url = "https://opensource.org/licenses/MIT"
+                        distribution = "repo"
+                    }
+                }
+                scm {
+                    url = "https://github.com/cmdjulian/heapdump-rotator"
+                }
+            }
         }
     }
     repositories {

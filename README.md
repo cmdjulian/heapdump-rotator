@@ -105,3 +105,7 @@ The recommended usage is to call `rotate()` **before** `runApplication<MyApplica
 
 This is intentional — rotation must happen before the JVM could potentially overwrite an existing dump. The `INFO` messages confirm that rotation occurred and are always visible regardless of Spring's log configuration.
 
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
