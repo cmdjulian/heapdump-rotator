@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.cmdjulian"
-version = project.findProperty("projectVersion")?.toString() ?: "1.0.0"
+version = project.findProperty("projectVersion")?.toString() ?: System.getenv("VERSION") ?: "1.0.0-SNAPSHOT"
 
 kotlin {
     jvmToolchain(11)
