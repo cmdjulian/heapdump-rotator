@@ -61,7 +61,8 @@ class HeapDumpRotator
                 // 2. Enforce retention policy (FIFO)
                 if (maxRetainedDumps != null && maxRetainedDumps > 0) {
                     val archivedDumps =
-                        parentDir.listDirectoryEntries()
+                        parentDir
+                            .listDirectoryEntries()
                             .filter { rotatedRegex.matches(it.name) }
                             .sortedBy { it.getLastModifiedTime() }
 
